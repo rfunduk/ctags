@@ -20,6 +20,12 @@ foreign mruby {
 
 foreign import gl { "system:opengl32.lib", "system:glu32.lib" }
 
+LIB :: ""
+
+foreign import stbi {
+    LIB when LIB != "" else "system:stb_image",
+}
+
 foreign libc {
     @private
     internal_init :: proc "c" () ---

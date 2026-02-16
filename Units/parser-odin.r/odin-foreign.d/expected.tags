@@ -12,15 +12,18 @@ close	input.odin	/^    close :: proc(state: rawptr) ---$/;"	proc	line:18	package
 gl	input.odin	/^foreign import gl { "system:opengl32.lib", "system:glu32.lib" }$/;"	foreign	line:21	package:ffi	roles:def
 system:opengl32.lib	input.odin	/^foreign import gl { "system:opengl32.lib", "system:glu32.lib" }$/;"	ccode	line:21	roles:imported	foreign:gl
 system:glu32.lib	input.odin	/^foreign import gl { "system:opengl32.lib", "system:glu32.lib" }$/;"	ccode	line:21	roles:imported	foreign:gl
-internal_init	input.odin	/^    internal_init :: proc "c" () ---$/;"	proc	line:25	package:ffi	signature:()	roles:def
-readv	input.odin	/^    readv :: proc "c" (fd: i32, iov: rawptr, cnt: i32) -> i32 ---$/;"	proc	line:26	package:ffi	signature:(fd: i32, iov: rawptr, cnt: i32)	roles:def
-getres	input.odin	/^    getres :: proc "c" (w: ^i32, h: ^i32) -> (i32, i32) ---$/;"	proc	line:27	package:ffi	signature:(w: ^i32, h: ^i32)	roles:def
-printf	input.odin	/^    printf :: proc "c" (fmt: cstring, #c_vararg args: ..any) -> i32 ---$/;"	proc	line:28	package:ffi	signature:(fmt: cstring, #c_vararg args: ..any)	roles:def
-get_buf	input.odin	/^    get_buf :: proc "c" (n: i32) -> [4]i32 ---$/;"	proc	line:29	package:ffi	signature:(n: i32)	roles:def
-epoll_create	input.odin	/^        epoll_create :: proc "c" (size: i32) -> i32 ---$/;"	proc	line:31	package:ffi	signature:(size: i32)	roles:def
-lowlevel	input.odin	/^foreign import lowlevel "lowlevel.asm"$/;"	foreign	line:36	package:ffi	roles:def
-lowlevel.asm	input.odin	/^foreign import lowlevel "lowlevel.asm"$/;"	asmfile	line:36	roles:imported	foreign:lowlevel
-__get_flags	input.odin	/^    __get_flags :: proc "c" () -> u64 ---$/;"	proc	line:38	package:ffi	signature:()	roles:def
-lowlevelalt	input.odin	/^foreign import lowlevelalt {$/;"	foreign	line:41	package:ffi	roles:def
-lowlevelalt0.s	input.odin	/^    "lowlevelalt0.s",$/;"	asmfile	line:42	roles:imported	foreign:lowlevelalt
-lowlevelalt0.S	input.odin	/^    "lowlevelalt0.S"$/;"	asmfile	line:43	roles:imported	foreign:lowlevelalt
+LIB	input.odin	/^LIB :: ""$/;"	const	line:23	package:ffi	roles:def
+stbi	input.odin	/^foreign import stbi {$/;"	foreign	line:25	package:ffi	roles:def
+system:stb_image	input.odin	/^    LIB when LIB != "" else "system:stb_image",$/;"	ccode	line:26	roles:imported	foreign:stbi
+internal_init	input.odin	/^    internal_init :: proc "c" () ---$/;"	proc	line:31	package:ffi	signature:()	roles:def
+readv	input.odin	/^    readv :: proc "c" (fd: i32, iov: rawptr, cnt: i32) -> i32 ---$/;"	proc	line:32	package:ffi	signature:(fd: i32, iov: rawptr, cnt: i32)	roles:def
+getres	input.odin	/^    getres :: proc "c" (w: ^i32, h: ^i32) -> (i32, i32) ---$/;"	proc	line:33	package:ffi	signature:(w: ^i32, h: ^i32)	roles:def
+printf	input.odin	/^    printf :: proc "c" (fmt: cstring, #c_vararg args: ..any) -> i32 ---$/;"	proc	line:34	package:ffi	signature:(fmt: cstring, #c_vararg args: ..any)	roles:def
+get_buf	input.odin	/^    get_buf :: proc "c" (n: i32) -> [4]i32 ---$/;"	proc	line:35	package:ffi	signature:(n: i32)	roles:def
+epoll_create	input.odin	/^        epoll_create :: proc "c" (size: i32) -> i32 ---$/;"	proc	line:37	package:ffi	signature:(size: i32)	roles:def
+lowlevel	input.odin	/^foreign import lowlevel "lowlevel.asm"$/;"	foreign	line:42	package:ffi	roles:def
+lowlevel.asm	input.odin	/^foreign import lowlevel "lowlevel.asm"$/;"	asmfile	line:42	roles:imported	foreign:lowlevel
+__get_flags	input.odin	/^    __get_flags :: proc "c" () -> u64 ---$/;"	proc	line:44	package:ffi	signature:()	roles:def
+lowlevelalt	input.odin	/^foreign import lowlevelalt {$/;"	foreign	line:47	package:ffi	roles:def
+lowlevelalt0.s	input.odin	/^    "lowlevelalt0.s",$/;"	asmfile	line:48	roles:imported	foreign:lowlevelalt
+lowlevelalt0.S	input.odin	/^    "lowlevelalt0.S"$/;"	asmfile	line:49	roles:imported	foreign:lowlevelalt

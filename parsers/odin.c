@@ -794,7 +794,7 @@ static void parseForeignBlockProcs (tokenInfo *const token, const int scope)
 	}
 }
 
-static bool isAsmfile(const char *fname)
+static bool isAsmfile (const char *fname)
 {
 	const char *ext = fileExtension (fname);
 	return (strcmp (ext, "asm") == 0
@@ -802,10 +802,27 @@ static bool isAsmfile(const char *fname)
 			|| strcmp (ext, "S") == 0);
 }
 
+static int makeForeignImportRefTag (tokenInfo *const token,
+									const char *foreign_name)
+{
+	if (vStringLength (token->string) == 0)
+		return CORK_NIL;
+
+	bool asmfile = isAsmfile (vStringValue (token->string));
+	int index = makeRefTag (token,
+							asmfile ? ODINTAG_ASMFILE : ODINTAG_CCODE,
+							asmfile ? R_ODINTAG_ASMFILE_IMPORTED : R_ODINTAG_CCODE_IMPORTED);
+	attachParserFieldToCorkEntry (index,
+								  OdinFields[F_FOREIGN].ftype,
+								  foreign_name);
+	return index;
+}
+
 static void parseForeign (tokenInfo *const token, const int scope)
 {
 	/* foreign import name "path"
 	 * foreign import name { "path1", "path2" }
+	 * foreign import name { EXPR when COND else "fallback", ... }
 	 * foreign name { ... }  (proc block)
 	 */
 	readToken (token);
@@ -815,7 +832,6 @@ static void parseForeign (tokenInfo *const token, const int scope)
 		readToken (token);
 		if (isType (token, TOKEN_IDENTIFIER))
 		{
-			int ccode;
 			int foreign = makeTag (token, ODINTAG_FOREIGN, scope, NULL);
 			tagEntryInfo *foreign_e = getEntryInCorkQueue (foreign);
 			const char *foreign_name = foreign_e ? foreign_e->name : NULL;
@@ -827,28 +843,12 @@ static void parseForeign (tokenInfo *const token, const int scope)
 				{
 					readToken (token);
 					if (isType (token, TOKEN_STRING))
-					{
-						bool asmfile = isAsmfile (vStringValue(token->string));
-						ccode = makeRefTag (token,
-											asmfile ? ODINTAG_ASMFILE : ODINTAG_CCODE,
-											asmfile ? R_ODINTAG_ASMFILE_IMPORTED : R_ODINTAG_CCODE_IMPORTED);
-						attachParserFieldToCorkEntry (ccode,
-													  OdinFields[F_FOREIGN].ftype,
-													  foreign_name);
-					}
+						makeForeignImportRefTag (token, foreign_name);
 				} while (!isType (token, TOKEN_CLOSE_CURLY)
 						 && !isType (token, TOKEN_EOF));
 			}
 			else if (isType (token, TOKEN_STRING))
-			{
-				bool asmfile = isAsmfile (vStringValue(token->string));
-				ccode = makeRefTag (token,
-									asmfile ? ODINTAG_ASMFILE : ODINTAG_CCODE,
-									asmfile ? R_ODINTAG_ASMFILE_IMPORTED : R_ODINTAG_CCODE_IMPORTED);
-				attachParserFieldToCorkEntry (ccode,
-											  OdinFields[F_FOREIGN].ftype,
-											  foreign_name);
-			}
+				makeForeignImportRefTag (token, foreign_name);
 		}
 	}
 	else if (isType (token, TOKEN_IDENTIFIER))
