@@ -165,7 +165,7 @@ static roleDefinition OdinAsmfileRoles [] = {
 };
 
 static roleDefinition OdinCollectionRoles [] = {
-	{ true, "referenced", "referenced in import statment" },
+	{ true, "referenced", "referenced in import statement" },
 };
 
 static kindDefinition OdinKinds[] = {
