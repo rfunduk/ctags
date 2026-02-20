@@ -710,7 +710,7 @@ static int tryMakeImplicitImportNameXtag (tokenInfo *const token)
 {
 	int index = CORK_NIL;
 
-	/* Looking for "f" in "collecion:lib/f" */
+	/* Looking for "f" in "collection:lib/f" */
 	const char *implicit_name = strrchr (vStringValue (token->string), '/');
 
 	if (/* Reject "colle" in "colle/ction:lib" */
