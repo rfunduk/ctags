@@ -727,7 +727,8 @@ static int tryMakeImplicitImportNameXtag (tokenInfo *const token)
 		index = makeTag (implicitNameToken,
 						 ODINTAG_IMPORT_NAME, CORK_NIL, NULL);
 		tagEntryInfo *e = getEntryInCorkQueue (index);
-		markTagExtraBit (e, OdinXtags[X_IMPLICIT_IMPORT_NAME].xtype);
+		if (e)
+			markTagExtraBit (e, OdinXtags[X_IMPLICIT_IMPORT_NAME].xtype);
 
 		deleteToken (implicitNameToken);
 	}
