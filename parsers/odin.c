@@ -193,7 +193,7 @@ static kindDefinition OdinKinds[] = {
 static fieldDefinition OdinFields[] = {
 	{
 		.name = "importName",
-		.description = "import name for the imported entity ",
+		.description = "import name for the imported entity",
 		.enabled = true,
 	},
 };
