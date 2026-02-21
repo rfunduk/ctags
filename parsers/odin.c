@@ -365,6 +365,65 @@ static void collectorTruncate (collector *collector)
 	vStringStripTrailing (collector->str);
 }
 
+static bool skipComment (int c, bool hasNewline)
+{
+	int d;
+
+	do
+	{
+		do
+		{
+			d = getcFromInputFile ();
+			if (d == '\n')
+			{
+				hasNewline = true;
+			}
+			else if (d == '/')
+			{
+				/* Check for nested comment */
+				int e = getcFromInputFile ();
+				if (e == '*')
+				{
+					/* Nested comment - recurse */
+					int nest = 1;
+					while (nest > 0 && d != EOF)
+					{
+						d = getcFromInputFile ();
+						if (d == '*')
+						{
+							int f = getcFromInputFile ();
+							if (f == '/')
+								nest--;
+							else
+								ungetcToInputFile (f);
+						}
+						else if (d == '/')
+						{
+							int f = getcFromInputFile ();
+							if (f == '*')
+								nest++;
+							else
+								ungetcToInputFile (f);
+						}
+						else if (d == '\n')
+							hasNewline = true;
+					}
+				}
+				else
+					ungetcToInputFile (e);
+			}
+		} while (d != EOF && d != '*');
+
+		c = getcFromInputFile ();
+		if (c == '/')
+			break;
+		else
+			ungetcToInputFile (c);
+	} while (c != EOF);
+
+	return hasNewline;
+}
+
 static void readTokenFull (tokenInfo *const token, collector *collector)
 {
 	int c;
@@ -411,58 +470,7 @@ static void readTokenFull (tokenInfo *const token, collector *collector)
 			skipToCharacterInInputFile ('\n');
 			goto getNextChar;
 		case '*':
-			do
-			{
-				do
-				{
-					d = getcFromInputFile ();
-					if (d == '\n')
-					{
-						hasNewline = true;
-					}
-					else if (d == '/')
-					{
-						/* Check for nested comment */
-						int e = getcFromInputFile ();
-						if (e == '*')
-						{
-							/* Nested comment - recurse */
-							int nest = 1;
-							while (nest > 0 && d != EOF)
-							{
-								d = getcFromInputFile ();
-								if (d == '*')
-								{
-									int f = getcFromInputFile ();
-									if (f == '/')
-										nest--;
-									else
-										ungetcToInputFile (f);
-								}
-								else if (d == '/')
-								{
-									int f = getcFromInputFile ();
-									if (f == '*')
-										nest++;
-									else
-										ungetcToInputFile (f);
-								}
-								else if (d == '\n')
-									hasNewline = true;
-							}
-						}
-						else
-							ungetcToInputFile (e);
-					}
-				} while (d != EOF && d != '*');
-
-				c = getcFromInputFile ();
-				if (c == '/')
-					break;
-				else
-					ungetcToInputFile (c);
-			} while (c != EOF);
-
+			hasNewline = skipComment(c, hasNewline);
 			ungetcToInputFile (hasNewline ? '\n' : ' ');
 			goto getNextChar;
 		default:
