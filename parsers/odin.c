@@ -393,184 +393,184 @@ getNextChar:
 
 	switch (c)
 	{
-		case EOF:
-			token->type = TOKEN_EOF;
-			break;
+	case EOF:
+		token->type = TOKEN_EOF;
+		break;
 
-		case ';':
-			token->type = TOKEN_SEMICOLON;
-			break;
+	case ';':
+		token->type = TOKEN_SEMICOLON;
+		break;
 
+	case '/':
+	{
+		bool hasNewline = false;
+		int d = getcFromInputFile ();
+		switch (d)
+		{
 		case '/':
+			skipToCharacterInInputFile ('\n');
+			goto getNextChar;
+		case '*':
+			do
 			{
-				bool hasNewline = false;
-				int d = getcFromInputFile ();
-				switch (d)
+				do
 				{
-					case '/':
-						skipToCharacterInInputFile ('\n');
-						goto getNextChar;
-					case '*':
-						do
+					d = getcFromInputFile ();
+					if (d == '\n')
+					{
+						hasNewline = true;
+					}
+					else if (d == '/')
+					{
+						/* Check for nested comment */
+						int e = getcFromInputFile ();
+						if (e == '*')
 						{
-							do
+							/* Nested comment - recurse */
+							int nest = 1;
+							while (nest > 0 && d != EOF)
 							{
 								d = getcFromInputFile ();
-								if (d == '\n')
+								if (d == '*')
 								{
-									hasNewline = true;
+									int f = getcFromInputFile ();
+									if (f == '/')
+										nest--;
+									else
+										ungetcToInputFile (f);
 								}
 								else if (d == '/')
 								{
-									/* Check for nested comment */
-									int e = getcFromInputFile ();
-									if (e == '*')
-									{
-										/* Nested comment - recurse */
-										int nest = 1;
-										while (nest > 0 && d != EOF)
-										{
-											d = getcFromInputFile ();
-											if (d == '*')
-											{
-												int f = getcFromInputFile ();
-												if (f == '/')
-													nest--;
-												else
-													ungetcToInputFile (f);
-											}
-											else if (d == '/')
-											{
-												int f = getcFromInputFile ();
-												if (f == '*')
-													nest++;
-												else
-													ungetcToInputFile (f);
-											}
-											else if (d == '\n')
-												hasNewline = true;
-										}
-									}
+									int f = getcFromInputFile ();
+									if (f == '*')
+										nest++;
 									else
-										ungetcToInputFile (e);
+										ungetcToInputFile (f);
 								}
-							} while (d != EOF && d != '*');
+								else if (d == '\n')
+									hasNewline = true;
+							}
+						}
+						else
+							ungetcToInputFile (e);
+					}
+				} while (d != EOF && d != '*');
 
-							c = getcFromInputFile ();
-							if (c == '/')
-								break;
-							else
-								ungetcToInputFile (c);
-						} while (c != EOF);
-
-						ungetcToInputFile (hasNewline ? '\n' : ' ');
-						goto getNextChar;
-					default:
-						token->type = TOKEN_OTHER;
-						ungetcToInputFile (d);
-						break;
-				}
-			}
-			break;
-
-		case '"':
-		case '\'':
-		case '`':
-			token->type = TOKEN_STRING;
-			parseString (token->string, c);
-			token->lineNumber = getInputLineNumber ();
-			token->filePosition = getInputFilePosition ();
-			break;
-
-		case '-':
-			{
-				int d = getcFromInputFile ();
-				if (d == '>')
-					token->type = TOKEN_ARROW;
+				c = getcFromInputFile ();
+				if (c == '/')
+					break;
 				else
-				{
-					ungetcToInputFile (d);
-					token->type = TOKEN_OTHER;
-				}
-			}
-			break;
+					ungetcToInputFile (c);
+			} while (c != EOF);
 
-		case ':':
-			{
-				int d = getcFromInputFile ();
-				if (d == ':')
-					token->type = TOKEN_DOUBLE_COLON;
-				else if (d == '=')
-					token->type = TOKEN_COLON_EQUAL;
-				else
-				{
-					ungetcToInputFile (d);
-					token->type = TOKEN_COLON;
-				}
-			}
-			break;
-
-		case '(':
-			token->type = TOKEN_OPEN_PAREN;
-			break;
-
-		case ')':
-			token->type = TOKEN_CLOSE_PAREN;
-			break;
-
-		case '{':
-			token->type = TOKEN_OPEN_CURLY;
-			break;
-
-		case '}':
-			token->type = TOKEN_CLOSE_CURLY;
-			break;
-
-		case '[':
-			token->type = TOKEN_OPEN_SQUARE;
-			break;
-
-		case ']':
-			token->type = TOKEN_CLOSE_SQUARE;
-			break;
-
-		case '.':
-			token->type = TOKEN_DOT;
-			break;
-
-		case ',':
-			token->type = TOKEN_COMMA;
-			break;
-
-		case '=':
-			token->type = TOKEN_EQUAL;
-			break;
-
-		case '#':
-			token->type = TOKEN_HASH;
-			break;
-
-		case '@':
-			token->type = TOKEN_AT;
-			break;
-
-		case '^':
-			token->type = TOKEN_CARET;
-			break;
-
+			ungetcToInputFile (hasNewline ? '\n' : ' ');
+			goto getNextChar;
 		default:
-			if (isStartIdentChar (c))
-			{
-				parseIdentifier (token->string, c);
-				token->keyword = lookupKeyword (vStringValue (token->string), Lang_odin);
-				if (isKeyword (token, KEYWORD_NONE))
-					token->type = TOKEN_IDENTIFIER;
-				else
-					token->type = TOKEN_KEYWORD;
-			}
-			else
-				token->type = TOKEN_OTHER;
+			token->type = TOKEN_OTHER;
+			ungetcToInputFile (d);
 			break;
+		}
+	}
+	break;
+
+	case '"':
+	case '\'':
+	case '`':
+		token->type = TOKEN_STRING;
+		parseString (token->string, c);
+		token->lineNumber = getInputLineNumber ();
+		token->filePosition = getInputFilePosition ();
+		break;
+
+	case '-':
+	{
+		int d = getcFromInputFile ();
+		if (d == '>')
+			token->type = TOKEN_ARROW;
+		else
+		{
+			ungetcToInputFile (d);
+			token->type = TOKEN_OTHER;
+		}
+	}
+	break;
+
+	case ':':
+	{
+		int d = getcFromInputFile ();
+		if (d == ':')
+			token->type = TOKEN_DOUBLE_COLON;
+		else if (d == '=')
+			token->type = TOKEN_COLON_EQUAL;
+		else
+		{
+			ungetcToInputFile (d);
+			token->type = TOKEN_COLON;
+		}
+	}
+	break;
+
+	case '(':
+		token->type = TOKEN_OPEN_PAREN;
+		break;
+
+	case ')':
+		token->type = TOKEN_CLOSE_PAREN;
+		break;
+
+	case '{':
+		token->type = TOKEN_OPEN_CURLY;
+		break;
+
+	case '}':
+		token->type = TOKEN_CLOSE_CURLY;
+		break;
+
+	case '[':
+		token->type = TOKEN_OPEN_SQUARE;
+		break;
+
+	case ']':
+		token->type = TOKEN_CLOSE_SQUARE;
+		break;
+
+	case '.':
+		token->type = TOKEN_DOT;
+		break;
+
+	case ',':
+		token->type = TOKEN_COMMA;
+		break;
+
+	case '=':
+		token->type = TOKEN_EQUAL;
+		break;
+
+	case '#':
+		token->type = TOKEN_HASH;
+		break;
+
+	case '@':
+		token->type = TOKEN_AT;
+		break;
+
+	case '^':
+		token->type = TOKEN_CARET;
+		break;
+
+	default:
+		if (isStartIdentChar (c))
+		{
+			parseIdentifier (token->string, c);
+			token->keyword = lookupKeyword (vStringValue (token->string), Lang_odin);
+			if (isKeyword (token, KEYWORD_NONE))
+				token->type = TOKEN_IDENTIFIER;
+			else
+				token->type = TOKEN_KEYWORD;
+		}
+		else
+			token->type = TOKEN_OTHER;
+		break;
 	}
 
 	token->c = c;
@@ -592,17 +592,17 @@ static bool skipToMatchedNoRead (tokenInfo *const token, collector *collector)
 
 	switch (open_token)
 	{
-		case TOKEN_OPEN_PAREN:
-			close_token = TOKEN_CLOSE_PAREN;
-			break;
-		case TOKEN_OPEN_CURLY:
-			close_token = TOKEN_CLOSE_CURLY;
-			break;
-		case TOKEN_OPEN_SQUARE:
-			close_token = TOKEN_CLOSE_SQUARE;
-			break;
-		default:
-			return false;
+	case TOKEN_OPEN_PAREN:
+		close_token = TOKEN_CLOSE_PAREN;
+		break;
+	case TOKEN_OPEN_CURLY:
+		close_token = TOKEN_CLOSE_CURLY;
+		break;
+	case TOKEN_OPEN_SQUARE:
+		close_token = TOKEN_CLOSE_SQUARE;
+		break;
+	default:
+		return false;
 	}
 
 	nest_level++;
@@ -1542,25 +1542,25 @@ static void parseBlock (tokenInfo *const token, int scope, bool isTopLevel)
 		{
 			switch (token->keyword)
 			{
-				case KEYWORD_package:
-					if (isTopLevel)
-						scope = parsePackage (token);
-					break;
-				case KEYWORD_import:
-					parseImport (token);
-					break;
-				case KEYWORD_foreign:
-					parseForeign (token, scope);
-					break;
-				case KEYWORD_when:
-					parseWhenBlock (token, scope);
-					continue;
-				case KEYWORD_if:
-				case KEYWORD_for:
-				case KEYWORD_switch:
-					break;
-				default:
-					break;
+			case KEYWORD_package:
+				if (isTopLevel)
+					scope = parsePackage (token);
+				break;
+			case KEYWORD_import:
+				parseImport (token);
+				break;
+			case KEYWORD_foreign:
+				parseForeign (token, scope);
+				break;
+			case KEYWORD_when:
+				parseWhenBlock (token, scope);
+				continue;
+			case KEYWORD_if:
+			case KEYWORD_for:
+			case KEYWORD_switch:
+				break;
+			default:
+				break;
 			}
 		}
 		else if (isType (token, TOKEN_HASH))
