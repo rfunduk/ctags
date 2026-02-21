@@ -376,7 +376,7 @@ static void readTokenFull (tokenInfo *const token, collector *collector)
 	token->keyword = KEYWORD_NONE;
 	vStringClear (token->string);
 
-getNextChar:
+ getNextChar:
 	do
 	{
 		c = getcFromInputFile ();
